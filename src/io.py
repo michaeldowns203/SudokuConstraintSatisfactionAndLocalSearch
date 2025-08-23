@@ -5,34 +5,35 @@ QMARK = "?"
 
 Grid = List[List[int]]
 
-
 def read_puzzle(path: str | Path) -> Grid:
-    """Read a 9x9 Sudoku puzzle; '?' => 0. Validates basic shape.
-    Input format: 9 lines, 9 space-separated tokens per line.
-    """
     p = Path(path)
-    assert p.exists(), f"Puzzle path not found: {p}"
-    rows: List[List[int]] = []
-    for line in p.read_text().strip().splitlines():
-        tokens = line.strip().split()
-        if not tokens:
+    if not p.exists():
+        raise FileNotFoundError(p)
+
+    text = p.read_text(encoding="utf-8-sig")  # <— strips BOM if present
+    rows: list[list[int]] = []
+
+    for lineno, raw in enumerate(text.splitlines(), start=1):
+        if not raw.strip():
             continue
-        row: List[int] = []
+        tokens = [t.strip() for t in raw.split(",")]
+        if len(tokens) != 9:
+            raise ValueError(f"Line {lineno}: expected 9 values, got {len(tokens)}")
+
+        row: list[int] = []
         for tok in tokens:
-            if tok == QMARK:
+            if tok in ("", "?"):
                 row.append(0)
             else:
                 try:
-                    v = int(tok)
+                    row.append(int(tok))
                 except ValueError:
-                    raise ValueError(f"Invalid token '{tok}' in puzzle file {p}")
-                if not (0 <= v <= 9):
-                    raise ValueError(f"Out-of-range value {v} in {p}")
-                row.append(v)
-                rows.append(row)
-                if len(rows) != 9 or any(len(r) != 9 for r in rows):
-                    raise ValueError(f"Puzzle must be 9x9; got {len(rows)} rows and {[len(r) for r in rows]}")
-        return rows
+                    raise ValueError(f"Line {lineno}: invalid token {tok!r}")
+        rows.append(row)
+
+    if len(rows) != 9:
+        raise ValueError(f"Puzzle must be 9x9; got {len(rows)} rows")
+    return rows
 
 
 def write_puzzle(grid: Grid, output_filename: str | Path) -> None:
