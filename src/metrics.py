@@ -18,9 +18,9 @@ class Metrics:
         self.decisions = self.restarts = self.generations = 0
         self.trace.clear()
 
-def __str__(self) -> str:
-    return (
-    f"assignments={self.assignments}, backtracks={self.backtracks}, "
-    f"inferences={self.inferences}, decisions={self.decisions}, "
-    f"restarts={self.restarts}, generations={self.generations}"
-    )
+    def __str__(self) -> str:
+        return (
+        f"assignments={self.assignments}, backtracks={self.backtracks}, "
+        f"inferences={self.inferences}, decisions={self.decisions}, "
+        f"restarts={self.restarts}, generations={self.generations}"
+        )

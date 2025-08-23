@@ -62,16 +62,17 @@ def ac3(csp: SudokuCSP, domains: Domains, metrics: Metrics) -> bool:
 
 def backtracking_search(
     csp: SudokuCSP,
-    mode: str, # 'bt' | 'fc' | 'ac3'
+    mode: str,  # 'bt' | 'fc' | 'ac3'
     metrics: Metrics,
-    var_heuristic: str = 'default', # 'default' | 'mrv-degree'
-    val_heuristic: str = 'default', # 'default' | 'lcv'
-    ) -> Optional[Dict[Var, Value]]:
-    """Backtracking with optional inference and heuristics.
-    Returns an assignment dict if solved else None.
-    """
+    var_heuristic: str = 'default',
+    val_heuristic: str = 'default',
+) -> Optional[Dict[Var, Value]]:
+    from copy import deepcopy
+
     domains: Domains = deepcopy(csp.domains)
-    assignment: Dict[Var, Value] = {i: next(iter(domains[i])) for i in range(81) if len(domains[i]) == 1}
+    assignment: Dict[Var, Value] = {
+        i: next(iter(domains[i])) for i in range(81) if len(domains[i]) == 1
+    }
 
     if var_heuristic == 'mrv-degree':
         select_var = lambda a: select_unassigned_var_mrv_degree(csp, a)
@@ -88,43 +89,43 @@ def backtracking_search(
             return assignment
 
         var = select_var(assignment)
+
         for val in order_vals(var, assignment):
             if val not in domains[var]:
                 continue
             if not csp.is_consistent(var, val, assignment):
                 continue
-            # choose
+
             assignment[var] = val
             metrics.assignments += 1
-            # inference
+
+            ok = True
             trail = None
+            saved_domain = None
+
             if mode == 'fc':
                 trail = forward_check(csp, domains, var, val, metrics)
                 if trail is None:
-                    # failed inference
-                    del assignment[var]
-                    metrics.backtracks += 1
-                    continue
-                elif mode == 'ac3':
-                    # Assign var=val in domains for AC-3
-                    saved = domains[var].copy()
-                    domains[var] = {val}
-                if not ac3(csp, domains, metrics):
-                    # restore and backtrack
-                    domains[var] = saved
-                    del assignment[var]
-                    metrics.backtracks += 1
-                    continue
-                # recurse
+                    ok = False
+            elif mode == 'ac3':
+                saved_domain = domains[var].copy()
+                domains[var] = {val}
+                ok = ac3(csp, domains, metrics)
+
+            if ok:
                 result = backtrack()
                 if result is not None:
                     return result
-                # undo
-                if mode == 'fc' and trail is not None:
-                    trail.undo(domains)
-                if mode == 'ac3':
-                    domains[var] = saved  # type: ignore
-                del assignment[var]
-                metrics.backtracks += 1
-            return None
-        return backtrack()
+
+            if mode == 'fc' and trail is not None:
+                trail.undo(domains)
+            elif mode == 'ac3' and saved_domain is not None:
+                domains[var] = saved_domain
+
+            del assignment[var]
+            metrics.backtracks += 1
+
+        return None
+
+    # 🚩 This was missing:
+    return backtrack()

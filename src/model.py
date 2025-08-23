@@ -68,19 +68,19 @@ class SudokuCSP:
                     fixed.add(i)
         return cls(domains=domains, fixed=fixed)
 
-def is_assignment_complete(self, assignment: Dict[Var, Value]) -> bool:
-    return len(assignment) == 81
+    def is_assignment_complete(self, assignment: Dict[Var, Value]) -> bool:
+        return len(assignment) == 81
 
-def is_consistent(self, var: Var, val: Value, assignment: Dict[Var, Value]) -> bool:
-    """Check against assigned neighbors only."""
-    for nb in NEIGHBORS[var]:
-        if nb in assignment and assignment[nb] == val:
-            return False
-    return True
+    def is_consistent(self, var: Var, val: Value, assignment: Dict[Var, Value]) -> bool:
+        """Check against assigned neighbors only."""
+        for nb in NEIGHBORS[var]:
+            if nb in assignment and assignment[nb] == val:
+                return False
+        return True
 
-def assignment_to_grid(self, assignment: Dict[Var, Value]) -> Grid:
-    grid: Grid = [[0]*9 for _ in range(9)]
-    for i, v in assignment.items():
-        r, c = idx_to_rc(i)
-        grid[r][c] = v
-    return grid
+    def assignment_to_grid(self, assignment: Dict[Var, Value]) -> Grid:
+        grid: Grid = [[0]*9 for _ in range(9)]
+        for i, v in assignment.items():
+            r, c = idx_to_rc(i)
+            grid[r][c] = v
+        return grid
