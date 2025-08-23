@@ -10,25 +10,29 @@ def read_puzzle(path: str | Path) -> Grid:
     if not p.exists():
         raise FileNotFoundError(p)
 
-    text = p.read_text(encoding="utf-8-sig")  # <— strips BOM if present
+    text = p.read_text(encoding="utf-8-sig")  # strips BOM if present
     rows: list[list[int]] = []
 
     for lineno, raw in enumerate(text.splitlines(), start=1):
         if not raw.strip():
             continue
-        tokens = [t.strip() for t in raw.split(",")]
+        # The input uses spaces between values
+        tokens = raw.split()
         if len(tokens) != 9:
             raise ValueError(f"Line {lineno}: expected 9 values, got {len(tokens)}")
 
         row: list[int] = []
         for tok in tokens:
-            if tok in ("", "?"):
+            if tok == QMARK:
                 row.append(0)
             else:
                 try:
-                    row.append(int(tok))
+                    v = int(tok)
                 except ValueError:
                     raise ValueError(f"Line {lineno}: invalid token {tok!r}")
+                if not (0 <= v <= 9):
+                    raise ValueError(f"Line {lineno}: out-of-range value {v}")
+                row.append(v)
         rows.append(row)
 
     if len(rows) != 9:
