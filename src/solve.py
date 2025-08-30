@@ -43,5 +43,3 @@ def solve(grid: Grid, algorithm: str, seed: int = 0) -> Tuple[Optional[Grid], Me
         cfg = GAConfig(seed=seed)
         solved = solve_ga(grid, cfg, metrics)
         return (solved if (solved and validate_solution(solved)) else None), metrics
-
-    raise ValueError(f"Unknown algorithm: {algorithm}")

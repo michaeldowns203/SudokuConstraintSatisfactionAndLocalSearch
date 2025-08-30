@@ -1,9 +1,9 @@
-from typing import Dict, Optional, List, Tuple, Iterable
+from typing import Dict, Optional, List, Tuple
 from copy import deepcopy
-from .model import SudokuCSP, Var, Value, Domains, NEIGHBORS
+from .model import SudokuCSP, Var, Value, Domains
 from .metrics import Metrics
 
-# -------------------- Heuristic hooks (fill these in later) --------------------
+# -------------------- Heuristic hooks --------------------
 
 def select_unassigned_var_default(assignment: Dict[Var, Value]) -> Var:
     # Left-to-right
@@ -27,7 +27,7 @@ def order_domain_values_lcv(csp: SudokuCSP, var: Var, assignment: Dict[Var, Valu
     """TODO: order by least-constraining value (min impact on neighbors)."""
     return order_domain_values_default(csp, var, assignment)
 
-# -------------------- Inference hooks (fill these in later) --------------------
+# -------------------- Inference hooks --------------------
 
 class Trail:
     """Records domain prunings so they can be undone on backtrack."""
@@ -47,8 +47,7 @@ def undo(self, domains: Domains) -> None:
 
 def forward_check(csp: SudokuCSP, domains: Domains, var: Var, val: Value, metrics: Metrics) -> Optional[Trail]:
     """Prune 'val' from neighbors; if any neighbor domain becomes empty, return None.
-    Return a Trail of prunings to undo later.
-    """
+    Return a Trail of prunings to undo later."""
     # TODO: implement FC; currently a no-op that succeeds
     return Trail()
 
@@ -67,7 +66,6 @@ def backtracking_search(
     var_heuristic: str = 'default',
     val_heuristic: str = 'default',
 ) -> Optional[Dict[Var, Value]]:
-    from copy import deepcopy
 
     domains: Domains = deepcopy(csp.domains)
     assignment: Dict[Var, Value] = {
@@ -127,5 +125,4 @@ def backtracking_search(
 
         return None
 
-    # 🚩 This was missing:
     return backtrack()
