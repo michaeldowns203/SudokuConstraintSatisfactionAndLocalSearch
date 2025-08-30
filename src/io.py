@@ -10,7 +10,7 @@ def read_puzzle(path: str | Path) -> Grid:
     if not p.exists():
         raise FileNotFoundError(p)
 
-    text = p.read_text(encoding="utf-8-sig")  # strips BOM if present
+    text = p.read_text(encoding="utf-8-sig")
     rows: list[list[int]] = []
 
     for lineno, raw in enumerate(text.splitlines(), start=1):
