@@ -3,3 +3,4 @@ src/__pycache__/local.cpython-311.pyc
 src/__pycache__/metrics.cpython-311.pyc
 src/__pycache__/search.cpython-311.pyc
 src/__pycache__/solve.cpython-311.pyc
+/src/__pycache__
