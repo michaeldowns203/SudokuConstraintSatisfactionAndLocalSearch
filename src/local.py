@@ -17,7 +17,7 @@ class SAConfig:
 
 
 def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Grid]:
-    """Min-conflicts SA skeleton. Fill blocks; swap within blocks; accept by SA rule.
+    """Min-conflicts SA. Fill blocks; swap within blocks; accept by SA rule.
     TODO: implement. Return solved grid or None."""
     random.seed(cfg.seed)
     # TODO: implement SA setup (fixed mask, fill blocks), conflict counters, swap loop, restarts.
@@ -37,7 +37,7 @@ class GAConfig:
 
 
 def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Grid]:
-    """GA skeleton using block-preserving representation and penalty fitness.
+    """GA using block-preserving representation and penalty fitness.
     TODO: implement. Return solved grid or None."""
     random.seed(cfg.seed)
     # TODO: implement GA (init, fitness, selection, crossover, mutation, elitism)
