@@ -1,6 +1,7 @@
+constraint checks: 6777
 assignments: 150
 backtracks: 102
-inferences: 1357
+inferences: 834
 decisions: 0
 restarts: 0
 generations: 0

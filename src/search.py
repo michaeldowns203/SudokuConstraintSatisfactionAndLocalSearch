@@ -11,8 +11,8 @@ def select_unassigned_idx(assignment: Dict[Index, Value]) -> Index:
             return i
     raise RuntimeError("No unassigned var found")
 
-def order_domain_values(domain_manager: DomainManager, var: Index) -> List[Value]:
-    return sorted(domain_manager.domains[var])
+def order_domain_values(domains: Domains, var: Index) -> List[Value]:
+    return sorted(domains[var])
 
 class Trail:
     def __init__(self):
@@ -37,6 +37,7 @@ def forward_check(domains: Domains, idx: Index, val: Value, metrics: Metrics) ->
         # If neighbor already assigned
         if len(d) == 1:
             # Constraint violated
+            metrics.constraint_checks += 1
             if val in d:
                 trail.undo(domains)
                 return None
@@ -59,15 +60,19 @@ def ac3(domains: Domains, metrics: Metrics) -> Optional[Trail]:
     queue = deque((i, j) for i in NEIGHBORS for j in NEIGHBORS[i])
 
     def revise(i, j) -> bool:
-        changed = False
-        if len(domains[j]) == 1:
-            (dj,) = tuple(domains[j])
-            for a in list(domains[i]):
-                if a == dj:
-                    trail.prune(domains, i, a)
-                    metrics.inferences += 1
-                    changed = True
-        return changed
+        removed = False
+        to_remove = []
+        # remove a in D(i) if j’s domain is {a}
+        for a in list(domains[i]):
+            supported = any((a != b) for b in domains[j])
+            metrics.constraint_checks += len(domains[j])
+            if not supported:
+                to_remove.append(a)
+        for a in to_remove:
+            trail.prune(domains, i, a)
+            metrics.inferences += 1
+            removed = True
+        return removed
 
     while queue:
         i, j = queue.popleft()
@@ -75,10 +80,11 @@ def ac3(domains: Domains, metrics: Metrics) -> Optional[Trail]:
             if not domains[i]: # domain wipeout
                 trail.undo(domains)
                 return None
-            for k in NEIGHBORS[i]:
-                if k != j:
-                    queue.append((k, i))
+            for nb in NEIGHBORS[i]:
+                if nb != j:
+                    queue.append((nb, i))
     return trail
+
 
 
 def backtracking(
@@ -94,7 +100,7 @@ def backtracking(
 
     select_idx = select_unassigned_idx
 
-    order_vals = lambda v, a: order_domain_values(domain_manager, v)
+    order_vals = lambda v, a: order_domain_values(domains, v)
 
     def backtrack() -> Optional[Dict[Index, Value]]:
         if len(assignment) == 81:
@@ -105,7 +111,7 @@ def backtracking(
         for val in order_vals(idx, assignment):
             if val not in domains[idx]:
                 continue
-            if not is_consistent(idx, val, assignment):
+            if not is_consistent(idx, val, assignment, metrics):
                 continue
 
             assignment[idx] = val
@@ -116,9 +122,12 @@ def backtracking(
             saved_domain = None
 
             if mode == 'fc':
+                saved_domain = domains[idx].copy()
+                domains[idx] = {val}
                 trail = forward_check(domains, idx, val, metrics)
                 if trail is None:
                     ok = False
+
             elif mode == 'ac3':
                 saved_domain = domains[idx].copy()
                 domains[idx] = {val}
@@ -134,7 +143,7 @@ def backtracking(
             if trail is not None:
                 trail.undo(domains)
 
-            if mode == 'ac3':
+            if saved_domain is not None:
                 domains[idx] = saved_domain
 
             del assignment[idx]

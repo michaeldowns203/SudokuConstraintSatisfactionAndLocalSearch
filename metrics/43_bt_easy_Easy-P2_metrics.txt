@@ -1,3 +1,4 @@
+constraint checks: 37350
 assignments: 678
 backtracks: 633
 inferences: 0
