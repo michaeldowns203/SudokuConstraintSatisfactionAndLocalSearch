@@ -1,0 +1,6 @@
+assignments: 150
+backtracks: 102
+inferences: 1357
+decisions: 0
+restarts: 0
+generations: 0
