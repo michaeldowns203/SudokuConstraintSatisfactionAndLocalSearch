@@ -80,7 +80,6 @@ def ac3(domains: Domains, metrics: Metrics) -> Optional[Trail]:
                     queue.append((k, i))
     return trail
 
-# -------------------- Core backtracking --------------------
 
 def backtracking(
     domain_manager: DomainManager,
