@@ -46,14 +46,24 @@ class Trail:
 def forward_check(domains: Domains, idx: Index, val: Value, metrics: Metrics) -> Optional[Trail]:
     trail = Trail()
 
-    for nb in NEIGHBORS:
-        if nb == idx:
+    for nb in NEIGHBORS[idx]:
+        d = domains[nb]
+        # If neighbor already assigned
+        if len(d) == 1:
+            # Constraint violated
+            if val in d:
+                trail.undo(domains)
+                return None
+            # Nothing to prune
             continue
-        if val in domains[nb]:
+        # Unassigned neighbor
+        if val in d:
+            # Remove conflicting value
             trail.prune(domains, nb, val)
             metrics.inferences += 1
-            if not domains[nb]:
+            if not domains[nb]:  # domain wipeout
                 trail.undo(domains)
+                return None
 
     return trail
 
