@@ -13,21 +13,23 @@ def solve(grid: Grid, algorithm: str, seed: int = 0) -> Tuple[Optional[Grid], Me
     domain_manager = DomainManager.from_grid(grid)
 
     if algorithm == 'bt':
-        assignment = backtracking(domain_manager, mode='bt', metrics=metrics, var_heuristic='default', val_heuristic='default')
+        assignment = backtracking(domain_manager, mode='bt', metrics=metrics)
         if assignment is None:
             return None, metrics
         solved = assignment_to_grid(assignment)
         return (solved if validate_solution(solved) else None), metrics
 
     if algorithm == 'fc':
-        assignment = backtracking(domain_manager, mode='fc', metrics=metrics, var_heuristic='mrv-degree', val_heuristic='lcv')
+        assignment = backtracking(domain_manager, mode='fc', metrics=metrics)
         if assignment is None:
             return None, metrics
         solved = assignment_to_grid(assignment)
         return (solved if validate_solution(solved) else None), metrics
 
     if algorithm == 'ac3':
-        assignment = backtracking(domain_manager, mode='ac3', metrics=metrics, var_heuristic='mrv-degree', val_heuristic='lcv')
+        assignment = backtracking(domain_manager, mode='ac3', metrics=metrics)
+        if assignment is None:
+            return None, metrics
         if assignment is None:
             return None, metrics
         solved = assignment_to_grid(assignment)

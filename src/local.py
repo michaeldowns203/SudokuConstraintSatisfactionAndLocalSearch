@@ -8,7 +8,6 @@ from .model import DomainManager, rc_to_idx
 
 Grid = List[List[int]]
 
-# -------------- Simulated Annealing --------------
 
 @dataclass
 class SAConfig:
@@ -103,8 +102,6 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
             return current_grid
     return None
 
-
-# -------------- Genetic Algorithm --------------
 
 @dataclass
 class GAConfig:

@@ -4,29 +4,15 @@ from copy import deepcopy
 from .model import DomainManager, Index, Value, Domains, NEIGHBORS, is_consistent
 from .metrics import Metrics
 
-# -------------------- Heuristic hooks --------------------
 
-def select_unassigned_idx_default(assignment: Dict[Index, Value]) -> Index:
+def select_unassigned_idx(assignment: Dict[Index, Value]) -> Index:
     for i in range(81):
         if i not in assignment:
             return i
     raise RuntimeError("No unassigned var found")
 
-
-def select_unassigned_idx_mrv_degree(domain_manager: DomainManager, assignment: Dict[Index, Value]) -> Index:
-    """TODO or not?: choose var with MRV, break ties by degree (most unassigned neighbors)."""
-    return select_unassigned_idx_default(assignment)
-
-
-def order_domain_values_default(domain_manager: DomainManager, var: Index) -> List[Value]:
+def order_domain_values(domain_manager: DomainManager, var: Index) -> List[Value]:
     return sorted(domain_manager.domains[var])
-
-
-def order_domain_values_lcv(domain_manager: DomainManager, var: Index, assignment: Dict[Index, Value]) -> List[Value]:
-    """TODO or not?: order by least-constraining value (min impact on neighbors)."""
-    return order_domain_values_default(domain_manager, var)
-
-# -------------------- Inference hooks --------------------
 
 class Trail:
     def __init__(self):
@@ -99,9 +85,7 @@ def ac3(domains: Domains, metrics: Metrics) -> Optional[Trail]:
 def backtracking(
     domain_manager: DomainManager,
     mode: str,  # 'bt' | 'fc' | 'ac3'
-    metrics: Metrics,
-    var_heuristic: str = 'default',
-    val_heuristic: str = 'default',
+    metrics: Metrics
 ) -> Optional[Dict[Index, Value]]:
 
     domains: Domains = deepcopy(domain_manager.domains)
@@ -109,15 +93,9 @@ def backtracking(
         i: next(iter(domains[i])) for i in range(81) if len(domains[i]) == 1
     }
 
-    if var_heuristic == 'mrv-degree':
-        select_idx = lambda a: select_unassigned_idx_mrv_degree(domain_manager, a)
-    else:
-        select_idx = select_unassigned_idx_default
+    select_idx = select_unassigned_idx
 
-    if val_heuristic == 'lcv':
-        order_vals = lambda v, a: order_domain_values_lcv(domain_manager, v, a)
-    else:
-        order_vals = lambda v, a: order_domain_values_default(domain_manager, v)
+    order_vals = lambda v, a: order_domain_values(domain_manager, v)
 
     def backtrack() -> Optional[Dict[Index, Value]]:
         if len(assignment) == 81:
