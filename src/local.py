@@ -13,8 +13,8 @@ Grid = List[List[int]]
 class SAConfig:
     domain_manager: DomainManager
     seed: int = 0
-    max_steps: int = 1000
-    restarts: int = 10
+    max_steps: int = 100000
+    restarts: int = 200
     temperature: float = 1.0
     cooling: float = 0.95
 
@@ -76,8 +76,10 @@ def flip(gridtemp, domain_manager):
 
 def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Grid]:
     current_grid = fillrandom(getBlocks(initial_grid))
+    stuck_count = 0
     for i in range (cfg.max_steps):
         for j in range(cfg.restarts):
+            stuck_count += 1
             metrics.restarts += 1
             metrics.decisions += 1
             newgrid = flip(current_grid, cfg.domain_manager)
@@ -99,6 +101,11 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
             print(saFitness(current_grid), metrics.restarts, metrics.decisions)
         cfg.temperature = cfg.temperature * cfg.cooling
         print(f"End of iteration, temperature: {cfg.temperature}")
+        if stuck_count == 15000:
+        #current_grid = fillrandom(blocks)
+            stuck_count = 0
+            print("Restarting with new random grid")
+            temperature = temperature + 2
         if saFitness(current_grid) == 0:
             return current_grid
     return None
