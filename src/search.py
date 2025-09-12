@@ -157,7 +157,9 @@ def backtracking(
             if trail is not None:
                 trail.undo(domains)
 
-            domains[idx] = saved_domain
+            if mode == 'ac3':
+                domains[idx] = saved_domain
+
             del assignment[idx]
             metrics.backtracks += 1
 
