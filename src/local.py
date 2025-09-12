@@ -19,16 +19,12 @@ class SAConfig:
     temperature: float = 1.0
     cooling: float = 0.95
 
-def fitness(grid):
-    ErrorCount = 0
+def saFitness(grid):
     total = 0
-    for i in range(0,9):
-        ErrorCount = (9 - len(np.unique(grid[:,i]))) + (9 - len(np.unique(grid[i,:])))
-        total = total + ErrorCount
-    for i in range(0,3):
-        for j in range(0,3):
-            ErrorCount = 9 - len(np.unique(grid[i*3:(i*3)+3,j*3:(j*3)+3]))
-            total = total + ErrorCount
+    for i in range(9):
+        col_i = [grid[r][i] for r in range(9)]
+        row_i = grid[i]
+        total += (9 - len(set(col_i))) + (9 - len(set(row_i)))
     return total
 
 def getBlocks(grid):
@@ -86,24 +82,24 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
             metrics.restarts += 1
             metrics.decisions += 1
             newgrid = flip(current_grid, cfg.domain_manager)
-            if fitness(newgrid) < fitness(current_grid):
+            if saFitness(newgrid) < saFitness(current_grid):
                 current_grid = newgrid
                 print("Accepted better solution")
             else:
-                acceptance_probability = np.exp((fitness(current_grid) - fitness(newgrid)) / cfg.temperature)
+                acceptance_probability = np.exp((saFitness(current_grid) - saFitness(newgrid)) / cfg.temperature)
                 if random.random() < acceptance_probability:
                     current_grid = newgrid
                     print("Accepted worse solution")
-            print(f"current fitness: {fitness(current_grid)}")
-            if fitness(current_grid) == 0:
+            print(f"current fitness: {saFitness(current_grid)}")
+            if saFitness(current_grid) == 0:
                 print("Solution found")
                 print(f"Total loops: {metrics.decisions}")
                 print(current_grid)
                 return current_grid
-            print(fitness(current_grid),metrics.restarts,metrics.decisions)
+            print(saFitness(current_grid), metrics.restarts, metrics.decisions)
         cfg.temperature = cfg.temperature * cfg.cooling
         print(f"End of iteration, temperature: {cfg.temperature}")
-        if fitness(current_grid) == 0:
+        if saFitness(current_grid) == 0:
             return current_grid
     return None
 
@@ -119,6 +115,18 @@ class GAConfig:
     tournament_k: int = 3
     mutation_rate: float = 0.5
     elitism: int = 2
+
+def gaFitness(grid):
+    ErrorCount = 0
+    total = 0
+    for i in range(0,9):
+        ErrorCount = (9 - len(np.unique(grid[:,i]))) + (9 - len(np.unique(grid[i,:])))
+        total = total + ErrorCount
+    for i in range(0,3):
+        for j in range(0,3):
+            ErrorCount = 9 - len(np.unique(grid[i*3:(i*3)+3,j*3:(j*3)+3]))
+            total = total + ErrorCount
+    return total
 
 def mutate(gridtemp , domain_manager):
     temporary = gridtemp.copy()
@@ -196,7 +204,7 @@ def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Gr
         fitness_list = []
         next_gen = []
         for individual in current_gen:
-            fitness_list.append(fitness(individual))
+            fitness_list.append(gaFitness(individual))
         average = sum(fitness_list) / len(fitness_list)
         print("Average Fitness: ", average)
         print("Best Fitness: ", min(fitness_list))
