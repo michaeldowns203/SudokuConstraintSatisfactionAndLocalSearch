@@ -70,11 +70,13 @@ class DomainManager:
 def is_assignment_complete(assignment: Dict[Index, Value]) -> bool:
     return len(assignment) == 81
 
-def is_consistent(idx: Index, val: Value, assignment: Dict[Index, Value]) -> bool:
+def is_consistent(idx: Index, val: Value, assignment: Dict[Index, Value], metrics) -> bool:
     # Check against assigned neighbors only
     for nb in NEIGHBORS[idx]:
-        if nb in assignment and assignment[nb] == val:
-            return False
+        if nb in assignment:
+            metrics.constraint_checks += 1
+            if assignment[nb] == val:
+                return False
     return True
 
 def assignment_to_grid(assignment: Dict[Index, Value]) -> Grid:

@@ -5,6 +5,7 @@ class Metrics:
     assignments: int = 0
     backtracks: int = 0
     inferences: int = 0 # prunings/arc revisions
+    constraint_checks: int = 0
 
     # Local-search oriented
     decisions: int = 0
@@ -20,7 +21,7 @@ class Metrics:
 
     def __str__(self) -> str:
         return (
-        f"assignments={self.assignments}, backtracks={self.backtracks}, "
+        f"constrain checks={self.constraint_checks} assignments={self.assignments}, backtracks={self.backtracks}, "
         f"inferences={self.inferences}, decisions={self.decisions}, "
         f"restarts={self.restarts}, generations={self.generations}"
         )
