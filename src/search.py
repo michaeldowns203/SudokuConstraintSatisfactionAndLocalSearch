@@ -61,38 +61,38 @@ def forward_check(domains: Domains, idx: Index, val: Value, metrics: Metrics) ->
             # Remove conflicting value
             trail.prune(domains, nb, val)
             metrics.inferences += 1
-            if not domains[nb]:  # domain wipeout
+            if not domains[nb]: # domain wipeout
                 trail.undo(domains)
                 return None
 
     return trail
 
 
-def ac3(domains: Domains, metrics: Metrics) -> bool:
+def ac3(domains: Domains, metrics: Metrics) -> Optional[Trail]:
+    trail = Trail()
     queue = deque((i, j) for i in NEIGHBORS for j in NEIGHBORS[i])
 
-    def revise(i: Index, j: Index) -> bool:
-        to_remove: List[Value] = []
-        for a in domains[i]:
-            # For Sudoku '!=', a has support in j if there exists b != a in D(j)
-            if all(b == a for b in domains[j]):
-                metrics.inferences += 1
-                to_remove.append(a)
-        if not to_remove:
-            return False
-        for a in to_remove:
-            domains[i].remove(a)
-        return True
+    def revise(i, j) -> bool:
+        changed = False
+        if len(domains[j]) == 1:
+            (dj,) = tuple(domains[j])
+            for a in list(domains[i]):
+                if a == dj:
+                    trail.prune(domains, i, a)
+                    metrics.inferences += 1
+                    changed = True
+        return changed
 
     while queue:
         i, j = queue.popleft()
         if revise(i, j):
-            if not domains[i]:
-                return False  # domain wipeout
+            if not domains[i]: # domain wipeout
+                trail.undo(domains)
+                return None
             for k in NEIGHBORS[i]:
                 if k != j:
                     queue.append((k, i))
-    return True
+    return trail
 
 # -------------------- Core backtracking --------------------
 
@@ -145,18 +145,19 @@ def backtracking(
             elif mode == 'ac3':
                 saved_domain = domains[idx].copy()
                 domains[idx] = {val}
-                ok = ac3(domains, metrics)
+                trail = ac3(domains, metrics)
+                if trail is None:
+                    ok = False
 
             if ok:
                 result = backtrack()
                 if result is not None:
                     return result
 
-            if mode == 'fc' and trail is not None:
+            if trail is not None:
                 trail.undo(domains)
-            elif mode == 'ac3' and saved_domain is not None:
-                domains[idx] = saved_domain
 
+            domains[idx] = saved_domain
             del assignment[idx]
             metrics.backtracks += 1
 
