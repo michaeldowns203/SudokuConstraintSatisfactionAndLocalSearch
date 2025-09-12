@@ -13,6 +13,8 @@ class Metrics:
 
     trace: list = field(default_factory=list)
 
+    sa_fitness_curve: list = field(default_factory=list)
+    ga_fitness_curve: list = field(default_factory=list)
     def reset(self) -> None:
         self.assignments = self.backtracks = self.inferences = 0
         self.decisions = self.restarts = self.generations = 0

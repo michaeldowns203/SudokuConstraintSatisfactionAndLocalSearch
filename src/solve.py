@@ -38,11 +38,15 @@ def solve(grid: Grid, algorithm: str, seed: int = 0) -> Tuple[Optional[Grid], Me
     if algorithm == 'sa':
         cfg = SAConfig(domain_manager, seed=seed)
         solved = solve_sa(grid, cfg, metrics)
+        if solved is None:
+            return None, metrics
         return (solved if validate_solution(solved) else None), metrics
 
     if algorithm == 'ga':
         cfg = GAConfig(domain_manager, seed=seed)
         solved = solve_ga(grid, cfg, metrics)
+        if solved is None:
+            return None, metrics
         return (solved if validate_solution(solved) else None), metrics
 
     return None, metrics

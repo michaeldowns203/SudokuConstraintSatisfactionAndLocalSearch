@@ -13,8 +13,8 @@ Grid = List[List[int]]
 class SAConfig:
     domain_manager: DomainManager
     seed: int = 0
-    max_steps: int = 10000
-    restarts: int = 200
+    max_steps: int = 1000
+    restarts: int = 10
     temperature: float = 1.0
     cooling: float = 0.95
 
@@ -81,6 +81,7 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
             metrics.restarts += 1
             metrics.decisions += 1
             newgrid = flip(current_grid, cfg.domain_manager)
+            metrics.sa_fitness_curve.append(saFitness(current_grid))
             if saFitness(newgrid) < saFitness(current_grid):
                 current_grid = newgrid
                 print("Accepted better solution")
@@ -200,6 +201,8 @@ def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Gr
         print(f"Generation {generation + 1}")
         fitness_list = []
         next_gen = []
+        best_fit = min(fitness_list)
+        metrics.ga_fitness_curve.append(best_fit)
         for individual in current_gen:
             fitness_list.append(gaFitness(individual))
         average = sum(fitness_list) / len(fitness_list)
