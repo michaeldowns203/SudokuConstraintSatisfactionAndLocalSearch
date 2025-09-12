@@ -80,7 +80,6 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
     for i in range (cfg.max_steps):
         for j in range(cfg.restarts):
             stuck_count += 1
-            metrics.restarts += 1
             metrics.decisions += 1
             newgrid = flip(current_grid, cfg.domain_manager)
             metrics.sa_fitness_curve.append(saFitness(current_grid))
