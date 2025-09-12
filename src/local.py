@@ -20,11 +20,15 @@ class SAConfig:
     cooling: float = 0.95
 
 def fitness(grid):
+    ErrorCount = 0
     total = 0
-    for i in range(9):
-        col_i = [grid[r][i] for r in range(9)]
-        row_i = grid[i]
-        total += (9 - len(set(col_i))) + (9 - len(set(row_i)))
+    for i in range(0,9):
+        ErrorCount = (9 - len(np.unique(grid[:,i]))) + (9 - len(np.unique(grid[i,:])))
+        total = total + ErrorCount
+    for i in range(0,3):
+        for j in range(0,3):
+            ErrorCount = 9 - len(np.unique(grid[i*3:(i*3)+3,j*3:(j*3)+3]))
+            total = total + ErrorCount
     return total
 
 def getBlocks(grid):
@@ -116,24 +120,16 @@ class GAConfig:
     mutation_rate: float = 0.5
     elitism: int = 2
 
-def mutate(gridtemp, domain_manager):
+def mutate(gridtemp , domain_manager):
     temporary = gridtemp.copy()
     while True:
         row1 =  random.randint(0,8)
         col1 =  random.randint(0,8)
-        while True:
-            r = random.randint(0,8)
-            c = random.randint(0,8)
-            if (r,c) != (row1,col1):
-                row2 = r
-                col2 = c
-                break
-        if rc_to_idx(row1, col1) not in domain_manager.fixed_values and rc_to_idx(row2, col2) not in domain_manager.fixed_values:
-            if random.random() < 0.5:
-                temp = temporary[row1][col1]
-                temporary[row1][col1] = temporary[row2][col2]
-                temporary[row2][col2] = temp
-            return temporary
+        if rc_to_idx(row1, col1) not in domain_manager.fixed_values:
+            if random.random() < 1:
+                temporary[row1][col1] = random.randint(1,9)
+            break
+    return temporary
 
 def population_initial(grid, flag):
     temp = grid.copy()
