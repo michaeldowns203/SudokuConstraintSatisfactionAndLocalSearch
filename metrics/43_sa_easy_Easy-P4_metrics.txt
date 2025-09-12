@@ -1,0 +1,6 @@
+assignments: 0
+backtracks: 0
+inferences: 0
+decisions: 11015
+restarts: 11015
+generations: 0
