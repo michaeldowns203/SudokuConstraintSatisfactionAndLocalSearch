@@ -201,8 +201,6 @@ def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Gr
         print(f"Generation {generation + 1}")
         fitness_list = []
         next_gen = []
-        best_fit = min(fitness_list)
-        metrics.ga_fitness_curve.append(best_fit)
         for individual in current_gen:
             fitness_list.append(gaFitness(individual))
         average = sum(fitness_list) / len(fitness_list)
@@ -222,6 +220,8 @@ def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Gr
             next_gen.append(child2)
             # print("%d pairs created\n"%(i+1))
             # print("NextGen Size: ",len(next_gen))
+        best_fit = min(fitness_list)
+        metrics.ga_fitness_curve.append(best_fit)
         current_gen = next_gen
         print(len(current_gen))
     return None
