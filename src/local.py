@@ -104,7 +104,7 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
         #current_grid = fillrandom(blocks)
             stuck_count = 0
             print("Restarting with new random grid")
-            temperature = temperature + 2
+            cfg.temperature = cfg.temperature + 2
         if saFitness(current_grid) == 0:
             return current_grid
     return None
@@ -143,7 +143,7 @@ def mutate(gridtemp , domain_manager):
             break
     return temporary
 
-def population_initial(grid, flag):
+def population_initial(grid, domain_manager):
     temp = grid.copy()
     for i in range(0,9):
         for j in range(0,9):
@@ -199,7 +199,7 @@ def crossover(parent1, parent2, domain_manager):
 def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Grid]:
     first_gen = []
     for p in range(0, cfg.population_size):
-        temp = population_initial(initial_grid.copy())
+        temp = population_initial(initial_grid.copy(),cfg.domain_manager)
         temp = np.array(temp)
         first_gen.append(temp.copy())
     current_gen = first_gen
@@ -223,8 +223,8 @@ def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Gr
             parent1 = tournament_selection(current_gen, fitness_list)
             parent2 = tournament_selection(current_gen, fitness_list)
             [child1,child2] = crossover(parent1, parent2, cfg.domain_manager)
-            child1 = mutate_update(child1,cfg.domain_manager)
-            child2 = mutate_update(child2,cfg.domain_manager)
+            child1 = mutate(child1,cfg.domain_manager)
+            child2 = mutate(child2,cfg.domain_manager)
             next_gen.append(child1)
             next_gen.append(child2)
             # print("%d pairs created\n"%(i+1))
