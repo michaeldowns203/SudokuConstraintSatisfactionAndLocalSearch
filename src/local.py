@@ -13,8 +13,8 @@ Grid = List[List[int]]
 class SAConfig:
     domain_manager: DomainManager
     seed: int = 0
-    max_steps: int = 1000
-    restarts: int = 10
+    max_steps: int = 100000
+    restarts: int = 200
     temperature: float = 1.0
     cooling: float = 0.95
 
@@ -76,9 +76,10 @@ def flip(gridtemp, domain_manager):
 
 def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Grid]:
     current_grid = fillrandom(getBlocks(initial_grid))
+    stuck_count = 0
     for i in range (cfg.max_steps):
         for j in range(cfg.restarts):
-            metrics.restarts += 1
+            stuck_count += 1
             metrics.decisions += 1
             newgrid = flip(current_grid, cfg.domain_manager)
             metrics.sa_fitness_curve.append(saFitness(current_grid))
@@ -99,6 +100,11 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
             print(saFitness(current_grid), metrics.restarts, metrics.decisions)
         cfg.temperature = cfg.temperature * cfg.cooling
         print(f"End of iteration, temperature: {cfg.temperature}")
+        if stuck_count == 15000:
+        #current_grid = fillrandom(blocks)
+            stuck_count = 0
+            print("Restarting with new random grid")
+            temperature = temperature + 2
         if saFitness(current_grid) == 0:
             return current_grid
     return None
@@ -141,7 +147,7 @@ def population_initial(grid, flag):
     temp = grid.copy()
     for i in range(0,9):
         for j in range(0,9):
-            if flag[i][j] != 1:
+            if rc_to_idx(i, j) not in domain_manager.fixed_values:
                 temp[i][j] = random.randint(1,9)
     return temp
 
@@ -179,19 +185,21 @@ def tournament_selection(population, fitnesses):
     return population[winner_index]
 
 def crossover(parent1, parent2, domain_manager):
-    child = parent1.copy()
+    child1 = parent1.copy()
+    child2 = parent2.copy()
     row = random.randint(0,8)
     col = random.randint(0,8)
     for i in range(row,9):
         for j in range(col,9):
             if rc_to_idx(i, j) not in domain_manager.fixed_values:
-                child[i][j] = parent2[i][j]
-    return child
+                child1[i][j] = parent2[i][j]
+                child2[i][j] = parent1[i][j]
+    return child1,child2
 
 def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Grid]:
     first_gen = []
     for p in range(0, cfg.population_size):
-        temp = population_initial_update(initial_grid.copy())
+        temp = population_initial(initial_grid.copy())
         temp = np.array(temp)
         first_gen.append(temp.copy())
     current_gen = first_gen
@@ -209,13 +217,14 @@ def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Gr
         if 0 in fitness_list:
             index = fitness_list.index(0)
             print("Solution Found")
-            print(first_gen[index])
+            print(current_gen[index])
             break
         for i in range(50):
             parent1 = tournament_selection(current_gen, fitness_list)
             parent2 = tournament_selection(current_gen, fitness_list)
-            child1 = mutate(crossover(parent1, parent2, cfg.domain_manager), cfg.domain_manager)
-            child2 = mutate(crossover(parent2, parent1, cfg.domain_manager), cfg.domain_manager)
+            [child1,child2] = crossover(parent1, parent2, cfg.domain_manager)
+            child1 = mutate_update(child1,cfg.domain_manager)
+            child2 = mutate_update(child2,cfg.domain_manager)
             next_gen.append(child1)
             next_gen.append(child2)
             # print("%d pairs created\n"%(i+1))

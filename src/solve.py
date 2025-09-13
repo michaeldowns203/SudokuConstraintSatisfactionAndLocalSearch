@@ -30,8 +30,6 @@ def solve(grid: Grid, algorithm: str, seed: int = 0) -> Tuple[Optional[Grid], Me
         assignment = backtracking(domain_manager, mode='ac3', metrics=metrics)
         if assignment is None:
             return None, metrics
-        if assignment is None:
-            return None, metrics
         solved = assignment_to_grid(assignment)
         return (solved if validate_solution(solved) else None), metrics
 
