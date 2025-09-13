@@ -143,7 +143,7 @@ def mutate(gridtemp , domain_manager):
             break
     return temporary
 
-def population_initial(grid, flag):
+def population_initial(grid, domain_manager):
     temp = grid.copy()
     for i in range(0,9):
         for j in range(0,9):
