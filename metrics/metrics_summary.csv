@@ -46,11 +46,11 @@ ac3,hard,Hard-P4,285397.0,64,11,686,0,0,0
 ac3,extreme,Evil-P1,221731.0,73,18,1551,0,0,0
 ac3,extreme,Evil-P2,236647.0,58,2,476,0,0,0
 ac3,extreme,Evil-P3,230226.0,57,2,497,0,0,0
-ac3,extreme,Evil-P4,103074.0,45,0,352,0,0,0
+ac3,extreme,Evil-P4,,45,0,352,0,0,0
 sa,easy,Easy-P1,,0,0,0,6699,6699,0
 sa,easy,Easy-P2,,0,0,0,2730,2730,0
 sa,easy,Easy-P3,,0,0,0,12224,12224,0
-sa,easy,Easy-P4,,0,0,0,11015,11015,0
+sa,easy,Easy-P4,,0,0,0,2980,0,0
 sa,medium,Med-P1,,0,0,0,3670,3670,0
 sa,medium,Med-P2,,0,0,0,11673,11673,0
 sa,medium,Med-P3,,0,0,0,10477,10477,0
