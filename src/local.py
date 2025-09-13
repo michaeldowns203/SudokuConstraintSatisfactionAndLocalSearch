@@ -104,7 +104,7 @@ def solve_sa(initial_grid: Grid, cfg: SAConfig, metrics: Metrics) -> Optional[Gr
         #current_grid = fillrandom(blocks)
             stuck_count = 0
             print("Restarting with new random grid")
-            temperature = temperature + 2
+            cfg.temperature = cfg.temperature + 2
         if saFitness(current_grid) == 0:
             return current_grid
     return None
@@ -199,7 +199,7 @@ def crossover(parent1, parent2, domain_manager):
 def solve_ga(initial_grid: Grid, cfg: GAConfig, metrics: Metrics) -> Optional[Grid]:
     first_gen = []
     for p in range(0, cfg.population_size):
-        temp = population_initial(initial_grid.copy())
+        temp = population_initial(initial_grid.copy(),cfg.domain_manager)
         temp = np.array(temp)
         first_gen.append(temp.copy())
     current_gen = first_gen
